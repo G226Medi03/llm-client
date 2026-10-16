@@ -4,7 +4,7 @@
 // through New.
 package llmclient
 
-import "github.com/G226Medi03/llmclient/core"
+import "github.com/G226Medi03/llm-client/core"
 
 type (
 	// Client is a provider-agnostic text LLM client.

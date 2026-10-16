@@ -8,7 +8,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/G226Medi03/llmclient/core"
+	"github.com/G226Medi03/llm-client/core"
 )
 
 func newTestClient(t *testing.T, handler http.HandlerFunc, opts core.Options) *Client {

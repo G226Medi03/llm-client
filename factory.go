@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/G226Medi03/llmclient/deepseek"
-	"github.com/G226Medi03/llmclient/ollama"
+	"github.com/G226Medi03/llm-client/deepseek"
+	"github.com/G226Medi03/llm-client/ollama"
 )
 
 // Provider identifies an LLM backend.

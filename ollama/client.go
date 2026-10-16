@@ -9,8 +9,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/G226Medi03/llmclient/core"
-	"github.com/G226Medi03/llmclient/internal/httpx"
+	"github.com/G226Medi03/llm-client/core"
+	"github.com/G226Medi03/llm-client/internal/httpx"
 )
 
 const (

@@ -10,7 +10,7 @@ Supported providers:
 ## Install
 
 ```sh
-go get github.com/G226Medi03/llmclient
+go get github.com/G226Medi03/llm-client
 ```
 
 ## Interfaces
