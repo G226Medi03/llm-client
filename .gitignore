@@ -1,0 +1,11 @@
+# build output
+*.exe
+*.test
+*.out
+
+# coverage
+coverage.txt
+
+# go workspace
+go.work
+go.work.sum
