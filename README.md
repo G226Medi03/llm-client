@@ -6,6 +6,7 @@ Supported providers:
 
 - **DeepSeek** (OpenAI-compatible chat completions, with OCR / image input)
 - **Ollama** (local `/api/chat`)
+- **Gemini** (Gemini 4 Argon thinking model)
 
 ## Install
 
@@ -56,13 +57,24 @@ client, err := ollama.New(ollama.Config{
 })
 ```
 
+### Gemini
+
+```go
+client, err := gemini.New(gemini.Config{
+    APIKey:        os.Getenv("GEMINI_API_KEY"),
+    Model:         gemini.ModelArgon, // gemini-4-argon
+    ThinkingLevel: gemini.ThinkingHigh,
+})
+```
+
 ### Factory
 
 ```go
 client, err := llmclient.New(llmclient.Config{
-    Provider: llmclient.ProviderDeepSeek,
-    Model:    deepseek.ModelV4Flash,
-    APIKey:   os.Getenv("DEEPSEEK_API_KEY"),
+    Provider:      llmclient.ProviderGemini,
+    Model:         gemini.ModelArgon,
+    APIKey:        os.Getenv("GEMINI_API_KEY"),
+    ThinkingLevel: "high",
 })
 ```
 

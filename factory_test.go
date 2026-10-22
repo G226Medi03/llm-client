@@ -6,6 +6,8 @@ func TestParseProvider(t *testing.T) {
 	cases := map[string]Provider{
 		"deepseek": ProviderDeepSeek,
 		"Ollama":   ProviderOllama,
+		"gemini":   ProviderGemini,
+		" Gemini ": ProviderGemini,
 		" ollama ": ProviderOllama,
 		"weird":    ProviderDeepSeek,
 		"":         ProviderDeepSeek,
@@ -26,6 +28,27 @@ func TestNewUnknownProvider(t *testing.T) {
 func TestNewDeepSeekRequiresKey(t *testing.T) {
 	if _, err := New(Config{Provider: ProviderDeepSeek}); err == nil {
 		t.Fatal("expected error for missing API key")
+	}
+}
+
+func TestNewGeminiRequiresKey(t *testing.T) {
+	if _, err := New(Config{Provider: ProviderGemini}); err == nil {
+		t.Fatal("expected error for missing API key")
+	}
+}
+
+func TestNewGemini(t *testing.T) {
+	client, err := New(Config{
+		Provider:      ProviderGemini,
+		APIKey:        "test-key",
+		Model:         "gemini-4-argon",
+		ThinkingLevel: "high",
+	})
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+	if client.Model() != "gemini-4-argon" {
+		t.Fatalf("model = %q", client.Model())
 	}
 }
 
