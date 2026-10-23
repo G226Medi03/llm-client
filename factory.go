@@ -72,11 +72,12 @@ func New(cfg Config) (Client, error) {
 		})
 	case ProviderOpenCode:
 		return opencode.New(opencode.Config{
-			APIKey:  cfg.APIKey,
-			BaseURL: cfg.BaseURL,
-			Model:   cfg.Model,
-			API:     cfg.API,
-			Options: cfg.Options,
+			APIKey:        cfg.APIKey,
+			BaseURL:       cfg.BaseURL,
+			Model:         cfg.Model,
+			API:           cfg.API,
+			ThinkingLevel: cfg.ThinkingLevel,
+			Options:       cfg.Options,
 		})
 	case ProviderDeepSeek, "":
 		return deepseek.New(deepseek.Config{

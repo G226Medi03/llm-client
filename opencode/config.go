@@ -13,6 +13,7 @@ import (
 const (
 	APIOpenAI    = "openai"
 	APIResponses = "responses"
+	APIGemini    = "gemini"
 )
 
 const defaultBaseURL = "https://opencode.ai/inference"
@@ -24,8 +25,10 @@ type Config struct {
 	APIKey  string
 	BaseURL string
 	Model   string
-	// API is openai or responses.
+	// API is openai, responses, or gemini.
 	API string
+	// ThinkingLevel is used by Gemini: low, medium, or high.
+	ThinkingLevel string
 	// SessionID is sent as x-opencode-session. Generated when empty.
 	SessionID string
 	// UserAgent identifies this client. Defaults to morbes-go-db.
@@ -51,8 +54,19 @@ func (cfg Config) normalize() (Config, error) {
 	case "", APIOpenAI:
 		cfg.API = APIOpenAI
 	case APIResponses:
+	case APIGemini:
 	default:
-		return cfg, errors.New("opencode: API must be openai or responses")
+		return cfg, errors.New("opencode: API must be openai, responses, or gemini")
+	}
+	if cfg.API == APIGemini {
+		cfg.ThinkingLevel = strings.ToLower(strings.TrimSpace(cfg.ThinkingLevel))
+		switch cfg.ThinkingLevel {
+		case "":
+			cfg.ThinkingLevel = "high"
+		case "low", "medium", "high":
+		default:
+			return cfg, errors.New("opencode: ThinkingLevel must be low, medium, or high")
+		}
 	}
 	if strings.TrimSpace(cfg.OCRPrompt) == "" {
 		cfg.OCRPrompt = defaultOCRPrompt

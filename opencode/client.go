@@ -16,6 +16,7 @@ type Client struct {
 	apiKey        string
 	model         string
 	api           string
+	thinkingLevel string
 	sessionID     string
 	userAgent     string
 	jsonMode      bool
@@ -31,16 +32,17 @@ func New(cfg Config) (*Client, error) {
 		return nil, err
 	}
 	return &Client{
-		http:      normalized.Options.HTTPClientOrDefault(),
-		baseURL:   normalized.BaseURL,
-		apiKey:    normalized.APIKey,
-		model:     normalized.Model,
-		api:       normalized.API,
-		sessionID: normalized.SessionID,
-		userAgent: normalized.UserAgent,
-		jsonMode:  normalized.Options.JSONMode,
-		ocrPrompt: normalized.OCRPrompt,
-		logger:    normalized.Options.LoggerOrDefault(),
+		http:          normalized.Options.HTTPClientOrDefault(),
+		baseURL:       normalized.BaseURL,
+		apiKey:        normalized.APIKey,
+		model:         normalized.Model,
+		api:           normalized.API,
+		thinkingLevel: normalized.ThinkingLevel,
+		sessionID:     normalized.SessionID,
+		userAgent:     normalized.UserAgent,
+		jsonMode:      normalized.Options.JSONMode,
+		ocrPrompt:     normalized.OCRPrompt,
+		logger:        normalized.Options.LoggerOrDefault(),
 	}, nil
 }
 
@@ -50,6 +52,8 @@ func (c *Client) Generate(ctx context.Context, prompt string) (string, error) {
 	switch c.api {
 	case APIResponses:
 		return c.generate_responses(ctx, prompt)
+	case APIGemini:
+		return c.generate_gemini(ctx, prompt)
 	default:
 		return c.generate_openai(ctx, prompt)
 	}
@@ -59,6 +63,8 @@ func (c *Client) GenerateStream(ctx context.Context, prompt string) (<-chan core
 	switch c.api {
 	case APIResponses:
 		return c.generate_responses_stream(ctx, prompt)
+	case APIGemini:
+		return c.generate_gemini_stream(ctx, prompt)
 	default:
 		return c.generate_openai_stream(ctx, prompt)
 	}
@@ -70,16 +76,17 @@ func (c *Client) Clone() core.Client { return c.clone() }
 
 func (c *Client) clone() *Client {
 	return &Client{
-		http:      c.http,
-		baseURL:   c.baseURL,
-		apiKey:    c.apiKey,
-		model:     c.model,
-		api:       c.api,
-		sessionID: c.sessionID,
-		userAgent: c.userAgent,
-		jsonMode:  c.jsonMode,
-		ocrPrompt: c.ocrPrompt,
-		logger:    c.logger,
+		http:          c.http,
+		baseURL:       c.baseURL,
+		apiKey:        c.apiKey,
+		model:         c.model,
+		api:           c.api,
+		thinkingLevel: c.thinkingLevel,
+		sessionID:     c.sessionID,
+		userAgent:     c.userAgent,
+		jsonMode:      c.jsonMode,
+		ocrPrompt:     c.ocrPrompt,
+		logger:        c.logger,
 	}
 }
 

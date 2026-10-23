@@ -57,6 +57,41 @@ func TestGenerateOpenAI(t *testing.T) {
 	}
 }
 
+func TestGenerateGemini(t *testing.T) {
+	var captured geminiRequest
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/google/v1beta/models/gemini-4-argon-contributor:generateContent" {
+			t.Errorf("path = %s", r.URL.Path)
+		}
+		if err := json.NewDecoder(r.Body).Decode(&captured); err != nil {
+			t.Errorf("decode: %v", err)
+		}
+		_, _ = w.Write([]byte(`{"candidates":[{"content":{"parts":[{"text":"thought","thought":true},{"text":"gemini answer"}]}}]}`))
+	}))
+	defer server.Close()
+
+	client, err := New(Config{
+		APIKey:        "test-key",
+		BaseURL:       server.URL,
+		Model:         "gemini-4-argon-contributor",
+		API:           APIGemini,
+		ThinkingLevel: "high",
+	})
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+	answer, err := client.Generate(context.Background(), "prompt")
+	if err != nil {
+		t.Fatalf("Generate: %v", err)
+	}
+	if answer != "gemini answer" {
+		t.Fatalf("answer = %q", answer)
+	}
+	if captured.GenerationConfig.ThinkingConfig.ThinkingLevel != "high" {
+		t.Fatalf("thinking = %q", captured.GenerationConfig.ThinkingConfig.ThinkingLevel)
+	}
+}
+
 func TestGenerateResponses(t *testing.T) {
 	var captured responsesRequest
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
