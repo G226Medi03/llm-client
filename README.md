@@ -7,6 +7,7 @@ Supported providers:
 - **DeepSeek** (OpenAI-compatible chat completions, with OCR / image input)
 - **Ollama** (local `/api/chat`)
 - **Gemini** (Gemini 4 Argon thinking model)
+- **OpenCode** (OpenCode inference gateway: OpenAI chat/completions, Responses, OCR)
 
 ## Install
 
@@ -67,14 +68,37 @@ client, err := gemini.New(gemini.Config{
 })
 ```
 
+### OpenCode
+
+```go
+client, err := opencode.New(opencode.Config{
+    APIKey:  os.Getenv("OPENCODE_API_KEY"),
+    BaseURL: "https://opencode.ai/inference/go",
+    Model:   "deepseek-v4.1-flash",
+    API:     opencode.APIOpenAI,
+})
+```
+
+Solver / Responses API:
+
+```go
+solver, err := opencode.New(opencode.Config{
+    APIKey:  os.Getenv("OPENCODE_CONSOLE_API_KEY"),
+    BaseURL: "https://opencode.ai/inference",
+    Model:   "gpt-6.1-sol",
+    API:     opencode.APIResponses,
+})
+```
+
 ### Factory
 
 ```go
 client, err := llmclient.New(llmclient.Config{
-    Provider:      llmclient.ProviderGemini,
-    Model:         gemini.ModelArgon,
-    APIKey:        os.Getenv("GEMINI_API_KEY"),
-    ThinkingLevel: "high",
+    Provider:      llmclient.ProviderOpenCode,
+    Model:         "gpt-6.1-sol",
+    APIKey:        os.Getenv("OPENCODE_CONSOLE_API_KEY"),
+    BaseURL:       "https://opencode.ai/inference",
+    API:           "responses",
 })
 ```
 

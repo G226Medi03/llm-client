@@ -4,13 +4,15 @@ import "testing"
 
 func TestParseProvider(t *testing.T) {
 	cases := map[string]Provider{
-		"deepseek": ProviderDeepSeek,
-		"Ollama":   ProviderOllama,
-		"gemini":   ProviderGemini,
-		" Gemini ": ProviderGemini,
-		" ollama ": ProviderOllama,
-		"weird":    ProviderDeepSeek,
-		"":         ProviderDeepSeek,
+		"deepseek":   ProviderDeepSeek,
+		"Ollama":     ProviderOllama,
+		"gemini":     ProviderGemini,
+		"opencode":   ProviderOpenCode,
+		" OpenCode ": ProviderOpenCode,
+		" Gemini ":   ProviderGemini,
+		" ollama ":   ProviderOllama,
+		"weird":      ProviderDeepSeek,
+		"":           ProviderDeepSeek,
 	}
 	for in, want := range cases {
 		if got := ParseProvider(in); got != want {
@@ -58,6 +60,22 @@ func TestNewOllama(t *testing.T) {
 		t.Fatalf("New: %v", err)
 	}
 	if client.Model() != "gemma4:e4b" {
+		t.Fatalf("model = %q", client.Model())
+	}
+}
+
+func TestNewOpenCode(t *testing.T) {
+	client, err := New(Config{
+		Provider: ProviderOpenCode,
+		APIKey:   "test-key",
+		BaseURL:  "https://opencode.ai/inference/go",
+		Model:    "deepseek-v4.1-flash",
+		API:      "openai",
+	})
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+	if client.Model() != "deepseek-v4.1-flash" {
 		t.Fatalf("model = %q", client.Model())
 	}
 }
