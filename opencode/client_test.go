@@ -19,6 +19,12 @@ func TestGenerateOpenAI(t *testing.T) {
 		if r.Header.Get("Authorization") != "Bearer test-key" {
 			t.Errorf("authorization = %q", r.Header.Get("Authorization"))
 		}
+		if r.Header.Get("x-opencode-session") == "" {
+			t.Errorf("missing x-opencode-session")
+		}
+		if r.Header.Get("User-Agent") == "" {
+			t.Errorf("missing User-Agent")
+		}
 		if err := json.NewDecoder(r.Body).Decode(&captured); err != nil {
 			t.Errorf("decode: %v", err)
 		}

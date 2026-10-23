@@ -16,6 +16,8 @@ type Client struct {
 	apiKey        string
 	model         string
 	api           string
+	sessionID     string
+	userAgent     string
 	jsonMode      bool
 	ocrPrompt     string
 	logger        *slog.Logger
@@ -34,6 +36,8 @@ func New(cfg Config) (*Client, error) {
 		apiKey:    normalized.APIKey,
 		model:     normalized.Model,
 		api:       normalized.API,
+		sessionID: normalized.SessionID,
+		userAgent: normalized.UserAgent,
 		jsonMode:  normalized.Options.JSONMode,
 		ocrPrompt: normalized.OCRPrompt,
 		logger:    normalized.Options.LoggerOrDefault(),
@@ -71,6 +75,8 @@ func (c *Client) clone() *Client {
 		apiKey:    c.apiKey,
 		model:     c.model,
 		api:       c.api,
+		sessionID: c.sessionID,
+		userAgent: c.userAgent,
 		jsonMode:  c.jsonMode,
 		ocrPrompt: c.ocrPrompt,
 		logger:    c.logger,
@@ -78,7 +84,11 @@ func (c *Client) clone() *Client {
 }
 
 func (c *Client) headers() map[string]string {
-	return map[string]string{"Authorization": "Bearer " + c.apiKey}
+	return map[string]string{
+		"Authorization":      "Bearer " + c.apiKey,
+		"x-opencode-session": c.sessionID,
+		"User-Agent":         c.userAgent,
+	}
 }
 
 func (c *Client) url(path string) string {

@@ -2,6 +2,8 @@
 package opencode
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"errors"
 	"strings"
 
@@ -24,6 +26,10 @@ type Config struct {
 	Model   string
 	// API is openai or responses.
 	API string
+	// SessionID is sent as x-opencode-session. Generated when empty.
+	SessionID string
+	// UserAgent identifies this client. Defaults to morbes-go-db.
+	UserAgent string
 	// OCRPrompt overrides the prompt used by AskOCR.
 	OCRPrompt string
 	Options   core.Options
@@ -51,5 +57,19 @@ func (cfg Config) normalize() (Config, error) {
 	if strings.TrimSpace(cfg.OCRPrompt) == "" {
 		cfg.OCRPrompt = defaultOCRPrompt
 	}
+	if strings.TrimSpace(cfg.UserAgent) == "" {
+		cfg.UserAgent = "morbes-go-db/0.1.0"
+	}
+	if strings.TrimSpace(cfg.SessionID) == "" {
+		cfg.SessionID = new_session_id()
+	}
 	return cfg, nil
+}
+
+func new_session_id() string {
+	buffer := make([]byte, 16)
+	if _, err := rand.Read(buffer); err != nil {
+		return "morbes-session"
+	}
+	return hex.EncodeToString(buffer)
 }
