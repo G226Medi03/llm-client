@@ -79,3 +79,32 @@ func TestNewOpenCode(t *testing.T) {
 		t.Fatalf("model = %q", client.Model())
 	}
 }
+
+func TestNewDeepSeekFacadeReturnsImageClient(t *testing.T) {
+	client, err := NewDeepSeek(DeepSeekConfig{
+		APIKey: "test-key",
+		Model:  ModelDeepSeekV4Flash,
+	})
+	if err != nil {
+		t.Fatalf("NewDeepSeek: %v", err)
+	}
+	var _ ImageClient = client
+	if client.Model() != ModelDeepSeekV4Flash {
+		t.Fatalf("model = %q", client.Model())
+	}
+}
+
+func TestNewOpenCodeFacadeReturnsImageClient(t *testing.T) {
+	client, err := NewOpenCode(OpenCodeConfig{
+		APIKey: "test-key",
+		Model:  "deepseek-v4.1-flash",
+		API:    OpenCodeAPIOpenAI,
+	})
+	if err != nil {
+		t.Fatalf("NewOpenCode: %v", err)
+	}
+	var _ ImageClient = client
+	if client.Model() != "deepseek-v4.1-flash" {
+		t.Fatalf("model = %q", client.Model())
+	}
+}

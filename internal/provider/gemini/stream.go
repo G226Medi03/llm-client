@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/G226Medi03/llm-client/core"
+	"github.com/G226Medi03/llm-client/internal/core"
 	"github.com/G226Medi03/llm-client/internal/httpx"
 )
 

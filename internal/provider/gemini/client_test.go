@@ -7,7 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/G226Medi03/llm-client/core"
+	"github.com/G226Medi03/llm-client/internal/core"
 )
 
 func TestGenerateFiltersThoughts(t *testing.T) {

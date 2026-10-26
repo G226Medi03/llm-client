@@ -6,7 +6,7 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/G226Medi03/llm-client/core"
+	"github.com/G226Medi03/llm-client/internal/core"
 )
 
 // Client is an OpenCode inference gateway client.
