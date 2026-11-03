@@ -6,18 +6,26 @@ import (
 
 	"github.com/G226Medi03/llm-client/internal/provider/deepseek"
 	"github.com/G226Medi03/llm-client/internal/provider/gemini"
+	"github.com/G226Medi03/llm-client/internal/provider/googleai"
+	"github.com/G226Medi03/llm-client/internal/provider/novita"
+	"github.com/G226Medi03/llm-client/internal/provider/nvidia"
 	"github.com/G226Medi03/llm-client/internal/provider/ollama"
 	"github.com/G226Medi03/llm-client/internal/provider/opencode"
+	"github.com/G226Medi03/llm-client/internal/provider/openrouter"
 )
 
 // Provider identifies an LLM backend.
 type Provider string
 
 const (
-	ProviderDeepSeek Provider = "deepseek"
-	ProviderOllama   Provider = "ollama"
-	ProviderGemini   Provider = "gemini"
-	ProviderOpenCode Provider = "opencode"
+	ProviderDeepSeek   Provider = "deepseek"
+	ProviderOllama     Provider = "ollama"
+	ProviderGemini     Provider = "gemini"
+	ProviderOpenCode   Provider = "opencode"
+	ProviderGoogleAI   Provider = "googleai"
+	ProviderNovita     Provider = "novita"
+	ProviderNvidia     Provider = "nvidia"
+	ProviderOpenRouter Provider = "openrouter"
 )
 
 // Model and API constants exposed by the root facade.
@@ -25,8 +33,18 @@ const (
 	ModelDeepSeekV4Flash = deepseek.ModelV4Flash
 	ModelGeminiArgon     = gemini.ModelArgon
 	ModelOllamaGemma4E4b = ollama.ModelGemma4E4b
+	ModelGoogleAIGemma   = googleai.DefaultModel
+	ModelNovitaGemma     = novita.DefaultModel
+	ModelNvidiaGemma     = nvidia.DefaultModel
+	ModelOpenRouterGemma = openrouter.DefaultModel
 
-	DefaultOllamaBaseURL = ollama.DefaultBaseURL
+	DefaultGoogleAIBaseURL   = googleai.DefaultBaseURL
+	DefaultNovitaBaseURL     = novita.DefaultBaseURL
+	DefaultNvidiaBaseURL     = nvidia.DefaultBaseURL
+	DefaultOpenRouterBaseURL = openrouter.DefaultBaseURL
+	DefaultOllamaBaseURL     = ollama.DefaultBaseURL
+
+	GoogleAIThinkingMinimal = googleai.DefaultThinking
 
 	GeminiThinkingLow    = gemini.ThinkingLow
 	GeminiThinkingMedium = gemini.ThinkingMedium
@@ -46,6 +64,14 @@ func ParseProvider(value string) Provider {
 		return ProviderGemini
 	case ProviderOpenCode:
 		return ProviderOpenCode
+	case ProviderGoogleAI:
+		return ProviderGoogleAI
+	case ProviderNovita:
+		return ProviderNovita
+	case ProviderNvidia:
+		return ProviderNvidia
+	case ProviderOpenRouter:
+		return ProviderOpenRouter
 	case ProviderDeepSeek:
 		return ProviderDeepSeek
 	}
@@ -66,8 +92,18 @@ type Config struct {
 	ThinkingLevel string
 	// IncludeThoughts requests Gemini thought summaries.
 	IncludeThoughts bool
-	// MaxOutputTokens is used by Gemini.
+	// MaxOutputTokens is used by Gemini and Ollama.
 	MaxOutputTokens int
+	// MaxTokens is used by Novita.
+	MaxTokens int
+	// Think is used by Ollama.
+	Think *bool
+	// HTTPReferer is used by OpenRouter.
+	HTTPReferer string
+	// Title is used by OpenRouter.
+	Title string
+	// OpenRouterProvider controls OpenRouter provider routing.
+	OpenRouterProvider *OpenRouterProviderPreferences
 	// OCRPrompt overrides the prompt used by DeepSeek/OpenCode OCR.
 	OCRPrompt string
 	// SessionID is used by OpenCode.
@@ -97,11 +133,53 @@ type GeminiConfig struct {
 	Options         Options
 }
 
-// OllamaConfig configures an Ollama client.
-type OllamaConfig struct {
+// GoogleAIConfig configures a Google AI Studio client.
+type GoogleAIConfig struct {
+	APIKey        string
+	BaseURL       string
+	Model         string
+	ThinkingLevel string
+	Options       Options
+}
+
+// NovitaConfig configures a Novita AI client.
+type NovitaConfig struct {
+	APIKey    string
+	BaseURL   string
+	Model     string
+	MaxTokens int
+	Options   Options
+}
+
+// NvidiaConfig configures an NVIDIA NIM client.
+type NvidiaConfig struct {
+	APIKey  string
 	BaseURL string
 	Model   string
 	Options Options
+}
+
+// OpenRouterProviderPreferences controls OpenRouter provider routing.
+type OpenRouterProviderPreferences = openrouter.ProviderPreferences
+
+// OpenRouterConfig configures an OpenRouter client.
+type OpenRouterConfig struct {
+	APIKey      string
+	BaseURL     string
+	Model       string
+	HTTPReferer string
+	Title       string
+	Provider    *OpenRouterProviderPreferences
+	Options     Options
+}
+
+// OllamaConfig configures an Ollama client.
+type OllamaConfig struct {
+	BaseURL         string
+	Model           string
+	Think           *bool
+	MaxOutputTokens int
+	Options         Options
 }
 
 // OpenCodeConfig configures an OpenCode gateway client.
@@ -117,14 +195,49 @@ type OpenCodeConfig struct {
 	Options       Options
 }
 
-// New builds a Client for the requested provider.
-func New(cfg Config) (Client, error) {
+// New builds an LlmClient for the requested provider.
+func New(cfg Config) (LlmClient, error) {
 	switch cfg.Provider {
 	case ProviderOllama:
 		return NewOllama(OllamaConfig{
+			BaseURL:         cfg.BaseURL,
+			Model:           cfg.Model,
+			Think:           cfg.Think,
+			MaxOutputTokens: cfg.MaxOutputTokens,
+			Options:         cfg.Options,
+		})
+	case ProviderGoogleAI:
+		return NewGoogleAI(GoogleAIConfig{
+			APIKey:        cfg.APIKey,
+			BaseURL:       cfg.BaseURL,
+			Model:         cfg.Model,
+			ThinkingLevel: cfg.ThinkingLevel,
+			Options:       cfg.Options,
+		})
+	case ProviderNovita:
+		return NewNovita(NovitaConfig{
+			APIKey:    cfg.APIKey,
+			BaseURL:   cfg.BaseURL,
+			Model:     cfg.Model,
+			MaxTokens: cfg.MaxTokens,
+			Options:   cfg.Options,
+		})
+	case ProviderNvidia:
+		return NewNvidia(NvidiaConfig{
+			APIKey:  cfg.APIKey,
 			BaseURL: cfg.BaseURL,
 			Model:   cfg.Model,
 			Options: cfg.Options,
+		})
+	case ProviderOpenRouter:
+		return NewOpenRouter(OpenRouterConfig{
+			APIKey:      cfg.APIKey,
+			BaseURL:     cfg.BaseURL,
+			Model:       cfg.Model,
+			HTTPReferer: cfg.HTTPReferer,
+			Title:       cfg.Title,
+			Provider:    cfg.OpenRouterProvider,
+			Options:     cfg.Options,
 		})
 	case ProviderGemini:
 		return NewGemini(GeminiConfig{
@@ -177,7 +290,7 @@ func NewDeepSeek(cfg DeepSeekConfig) (ImageClient, error) {
 }
 
 // NewGemini builds a Gemini client.
-func NewGemini(cfg GeminiConfig) (Client, error) {
+func NewGemini(cfg GeminiConfig) (LlmClient, error) {
 	client, err := gemini.New(gemini.Config{
 		APIKey:          cfg.APIKey,
 		Model:           cfg.Model,
@@ -194,11 +307,74 @@ func NewGemini(cfg GeminiConfig) (Client, error) {
 }
 
 // NewOllama builds an Ollama client.
-func NewOllama(cfg OllamaConfig) (Client, error) {
+func NewOllama(cfg OllamaConfig) (LlmClient, error) {
 	client, err := ollama.New(ollama.Config{
-		BaseURL: cfg.BaseURL,
-		Model:   cfg.Model,
-		Options: cfg.Options,
+		BaseURL:         cfg.BaseURL,
+		Model:           cfg.Model,
+		Think:           cfg.Think,
+		MaxOutputTokens: cfg.MaxOutputTokens,
+		Options:         cfg.Options,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return client, nil
+}
+
+// NewGoogleAI builds a Google AI Studio client.
+func NewGoogleAI(cfg GoogleAIConfig) (LlmClient, error) {
+	client, err := googleai.New(googleai.Config{
+		APIKey:        cfg.APIKey,
+		BaseURL:       cfg.BaseURL,
+		Model:         cfg.Model,
+		ThinkingLevel: cfg.ThinkingLevel,
+		HTTPClient:    cfg.Options.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return client, nil
+}
+
+// NewNovita builds a Novita AI client.
+func NewNovita(cfg NovitaConfig) (LlmClient, error) {
+	client, err := novita.New(novita.Config{
+		APIKey:     cfg.APIKey,
+		BaseURL:    cfg.BaseURL,
+		Model:      cfg.Model,
+		MaxTokens:  cfg.MaxTokens,
+		HTTPClient: cfg.Options.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return client, nil
+}
+
+// NewNvidia builds an NVIDIA NIM client.
+func NewNvidia(cfg NvidiaConfig) (LlmClient, error) {
+	client, err := nvidia.New(nvidia.Config{
+		APIKey:     cfg.APIKey,
+		BaseURL:    cfg.BaseURL,
+		Model:      cfg.Model,
+		HTTPClient: cfg.Options.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return client, nil
+}
+
+// NewOpenRouter builds an OpenRouter client.
+func NewOpenRouter(cfg OpenRouterConfig) (LlmClient, error) {
+	client, err := openrouter.New(openrouter.Config{
+		APIKey:      cfg.APIKey,
+		BaseURL:     cfg.BaseURL,
+		Model:       cfg.Model,
+		HTTPReferer: cfg.HTTPReferer,
+		Title:       cfg.Title,
+		Provider:    cfg.Provider,
+		HTTPClient:  cfg.Options.HTTPClient,
 	})
 	if err != nil {
 		return nil, err

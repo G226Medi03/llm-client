@@ -13,8 +13,9 @@ import (
 	"github.com/G226Medi03/llm-client/internal/httpx"
 )
 
-// Client is a Gemini API client. It implements core.Client.
+// Client is a Gemini API client. It implements core.LlmClient.
 type Client struct {
+	core.Sealed
 	http            *http.Client
 	baseURL         string
 	apiKey          string
@@ -80,7 +81,7 @@ func (c *Client) Generate(ctx context.Context, prompt string) (string, error) {
 func (c *Client) ResetContext() {}
 
 // Clone returns a copy without mutable state.
-func (c *Client) Clone() core.Client {
+func (c *Client) Clone() core.LlmClient {
 	return c.clone()
 }
 
@@ -182,3 +183,5 @@ type apiError struct {
 	Message string `json:"message"`
 	Status  string `json:"status"`
 }
+
+var _ core.LlmClient = (*Client)(nil)

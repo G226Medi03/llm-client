@@ -37,8 +37,9 @@ type Config struct {
 	Options core.Options
 }
 
-// Client is a DeepSeek chat client. It implements core.Client and core.OcrClient.
+// Client is a DeepSeek chat client. It implements core.LlmClient and core.OcrClient.
 type Client struct {
+	core.Sealed
 	http          *http.Client
 	baseURL       string
 	apiKey        string
@@ -102,7 +103,7 @@ func (c *Client) ResetContext() {
 }
 
 // Clone returns a copy without conversation history.
-func (c *Client) Clone() core.Client {
+func (c *Client) Clone() core.LlmClient {
 	return c.clone()
 }
 
@@ -184,3 +185,5 @@ func (c *Client) send(ctx context.Context, req *request) (string, error) {
 	}
 	return parsed.Choices[0].Message.Content, nil
 }
+
+var _ core.LlmClient = (*Client)(nil)

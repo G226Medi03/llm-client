@@ -67,6 +67,35 @@ func TestJSONMode(t *testing.T) {
 	}
 }
 
+func TestGeneratePassesThinkAndMaxTokens(t *testing.T) {
+	var gotBody chatRequest
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_ = json.NewDecoder(r.Body).Decode(&gotBody)
+		_ = json.NewEncoder(w).Encode(chatResponse{Message: chatMessage{Content: "ok"}, Done: true})
+	}))
+	defer srv.Close()
+
+	think := false
+	client, err := New(Config{
+		BaseURL:         srv.URL,
+		Model:           "gemma4:31b",
+		Think:           &think,
+		MaxOutputTokens: 128,
+	})
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+	if _, err := client.Generate(context.Background(), "hello"); err != nil {
+		t.Fatalf("Generate: %v", err)
+	}
+	if gotBody.Think == nil || *gotBody.Think {
+		t.Fatalf("think = %#v, want false", gotBody.Think)
+	}
+	if gotBody.Options == nil || gotBody.Options.NumPredict != 128 {
+		t.Fatalf("options = %#v, want num_predict=128", gotBody.Options)
+	}
+}
+
 func TestGenerateStream(t *testing.T) {
 	c := newTestClient(t, func(w http.ResponseWriter, r *http.Request) {
 		flusher, _ := w.(http.Flusher)

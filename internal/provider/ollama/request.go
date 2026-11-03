@@ -10,6 +10,13 @@ type chatRequest struct {
 	Messages []chatMessage `json:"messages"`
 	Stream   bool          `json:"stream"`
 	Format   string        `json:"format,omitempty"`
+	Think    *bool         `json:"think,omitempty"`
+	Options  *chatOptions  `json:"options,omitempty"`
+}
+
+type chatOptions struct {
+	Temperature float64 `json:"temperature,omitempty"`
+	NumPredict  int     `json:"num_predict,omitempty"`
 }
 
 type chatResponse struct {

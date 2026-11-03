@@ -26,17 +26,24 @@ type Config struct {
 	BaseURL string
 	// Model is required.
 	Model string
+	// Think overrides Ollama's thinking mode. Nil omits the field.
+	Think *bool
+	// MaxOutputTokens maps to options.num_predict. Zero omits the option.
+	MaxOutputTokens int
 	// Options are shared client settings.
 	Options core.Options
 }
 
-// Client is an Ollama chat client. It implements core.Client.
+// Client is an Ollama chat client. It implements core.LlmClient.
 type Client struct {
-	http     *http.Client
-	baseURL  string
-	model    string
-	jsonMode bool
-	logger   *slog.Logger
+	core.Sealed
+	http            *http.Client
+	baseURL         string
+	model           string
+	think           *bool
+	maxOutputTokens int
+	jsonMode        bool
+	logger          *slog.Logger
 }
 
 // New builds an Ollama client.
@@ -50,11 +57,13 @@ func New(cfg Config) (*Client, error) {
 		baseURL = DefaultBaseURL
 	}
 	return &Client{
-		http:     cfg.Options.HTTPClientOrDefault(),
-		baseURL:  baseURL,
-		model:    model,
-		jsonMode: cfg.Options.JSONMode,
-		logger:   cfg.Options.LoggerOrDefault(),
+		http:            cfg.Options.HTTPClientOrDefault(),
+		baseURL:         baseURL,
+		model:           model,
+		think:           cfg.Think,
+		maxOutputTokens: cfg.MaxOutputTokens,
+		jsonMode:        cfg.Options.JSONMode,
+		logger:          cfg.Options.LoggerOrDefault(),
 	}, nil
 }
 
@@ -90,13 +99,15 @@ func (c *Client) Generate(ctx context.Context, prompt string) (string, error) {
 func (c *Client) ResetContext() {}
 
 // Clone returns an equivalent client.
-func (c *Client) Clone() core.Client {
+func (c *Client) Clone() core.LlmClient {
 	return &Client{
-		http:     c.http,
-		baseURL:  c.baseURL,
-		model:    c.model,
-		jsonMode: c.jsonMode,
-		logger:   c.logger,
+		http:            c.http,
+		baseURL:         c.baseURL,
+		model:           c.model,
+		think:           c.think,
+		maxOutputTokens: c.maxOutputTokens,
+		jsonMode:        c.jsonMode,
+		logger:          c.logger,
 	}
 }
 
@@ -109,9 +120,18 @@ func (c *Client) newRequest(prompt string, stream bool) chatRequest {
 		Model:    c.model,
 		Messages: []chatMessage{{Role: "user", Content: prompt}},
 		Stream:   stream,
+		Think:    c.think,
+	}
+	if c.maxOutputTokens > 0 {
+		req.Options = &chatOptions{
+			Temperature: 0,
+			NumPredict:  c.maxOutputTokens,
+		}
 	}
 	if c.jsonMode {
 		req.Format = "json"
 	}
 	return req
 }
+
+var _ core.LlmClient = (*Client)(nil)

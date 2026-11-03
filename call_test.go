@@ -4,9 +4,12 @@ import (
 	"context"
 	"testing"
 	"time"
+
+	"github.com/G226Medi03/llm-client/internal/core"
 )
 
 type fakeClient struct {
+	core.Sealed
 	output string
 }
 
@@ -20,7 +23,7 @@ func (f *fakeClient) GenerateStream(context.Context, string) (<-chan StreamResul
 	return ch, nil
 }
 func (f *fakeClient) ResetContext() {}
-func (f *fakeClient) Clone() Client {
+func (f *fakeClient) Clone() LlmClient {
 	copy := *f
 	return &copy
 }
