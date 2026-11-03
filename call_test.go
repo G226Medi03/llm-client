@@ -4,14 +4,13 @@ import (
 	"context"
 	"testing"
 	"time"
-
-	"github.com/G226Medi03/llm-client/internal/core"
 )
 
 type fakeClient struct {
-	core.Sealed
 	output string
 }
+
+func (*fakeClient) is_LlmClient() {}
 
 func (f *fakeClient) Model() string { return "fake" }
 func (f *fakeClient) Generate(context.Context, string) (string, error) {

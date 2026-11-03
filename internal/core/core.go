@@ -14,24 +14,16 @@ type StreamResult struct {
 	Err      error
 }
 
-// LlmClient is a provider-agnostic text LLM client.
-// The unexported method seals the interface so only this module can
-// provide implementations.
-type LlmClient interface {
+// ProviderClient is implemented by internal providers. It is intentionally
+// unsealed because providers live in internal subpackages; the root package
+// wraps it in the root LlmClient.
+type ProviderClient interface {
 	Model() string
 	Generate(ctx context.Context, prompt string) (string, error)
 	GenerateStream(ctx context.Context, prompt string) (<-chan StreamResult, error)
 	ResetContext()
-	Clone() LlmClient
-
-	is_LlmClient()
+	Clone() ProviderClient
 }
-
-// Sealed is embedded by provider clients to satisfy LlmClient's unexported
-// marker method without exposing an implementation hook to other modules.
-type Sealed struct{}
-
-func (Sealed) is_LlmClient() {}
 
 // OcrClient is implemented by clients that accept images.
 type OcrClient interface {

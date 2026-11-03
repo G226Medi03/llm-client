@@ -11,7 +11,6 @@ import (
 
 // Client is an OpenCode inference gateway client.
 type Client struct {
-	core.Sealed
 	http          *http.Client
 	baseURL       string
 	apiKey        string
@@ -73,7 +72,7 @@ func (c *Client) GenerateStream(ctx context.Context, prompt string) (<-chan core
 
 func (c *Client) ResetContext() { c.savedMessages = nil }
 
-func (c *Client) Clone() core.LlmClient { return c.clone() }
+func (c *Client) Clone() core.ProviderClient { return c.clone() }
 
 func (c *Client) clone() *Client {
 	return &Client{
@@ -107,4 +106,4 @@ func (c *Client) errorf(format string, args ...any) error {
 	return fmt.Errorf("opencode: "+format, args...)
 }
 
-var _ core.LlmClient = (*Client)(nil)
+var _ core.ProviderClient = (*Client)(nil)

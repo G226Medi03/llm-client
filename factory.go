@@ -286,7 +286,7 @@ func NewDeepSeek(cfg DeepSeekConfig) (ImageClient, error) {
 	if err != nil {
 		return nil, err
 	}
-	return client, nil
+	return wrap_image_client(client, client), nil
 }
 
 // NewGemini builds a Gemini client.
@@ -303,7 +303,7 @@ func NewGemini(cfg GeminiConfig) (LlmClient, error) {
 	if err != nil {
 		return nil, err
 	}
-	return client, nil
+	return wrap_client(client), nil
 }
 
 // NewOllama builds an Ollama client.
@@ -318,7 +318,7 @@ func NewOllama(cfg OllamaConfig) (LlmClient, error) {
 	if err != nil {
 		return nil, err
 	}
-	return client, nil
+	return wrap_client(client), nil
 }
 
 // NewGoogleAI builds a Google AI Studio client.
@@ -333,7 +333,7 @@ func NewGoogleAI(cfg GoogleAIConfig) (LlmClient, error) {
 	if err != nil {
 		return nil, err
 	}
-	return client, nil
+	return wrap_client(client), nil
 }
 
 // NewNovita builds a Novita AI client.
@@ -348,7 +348,7 @@ func NewNovita(cfg NovitaConfig) (LlmClient, error) {
 	if err != nil {
 		return nil, err
 	}
-	return client, nil
+	return wrap_client(client), nil
 }
 
 // NewNvidia builds an NVIDIA NIM client.
@@ -362,7 +362,7 @@ func NewNvidia(cfg NvidiaConfig) (LlmClient, error) {
 	if err != nil {
 		return nil, err
 	}
-	return client, nil
+	return wrap_client(client), nil
 }
 
 // NewOpenRouter builds an OpenRouter client.
@@ -379,7 +379,7 @@ func NewOpenRouter(cfg OpenRouterConfig) (LlmClient, error) {
 	if err != nil {
 		return nil, err
 	}
-	return client, nil
+	return wrap_client(client), nil
 }
 
 // NewOpenCode builds an OpenCode gateway client, including OCR support.
@@ -398,5 +398,5 @@ func NewOpenCode(cfg OpenCodeConfig) (ImageClient, error) {
 	if err != nil {
 		return nil, err
 	}
-	return client, nil
+	return wrap_image_client(client, client), nil
 }

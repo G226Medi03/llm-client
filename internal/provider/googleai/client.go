@@ -30,7 +30,6 @@ type Config struct {
 }
 
 type Client struct {
-	core.Sealed
 	http          *http.Client
 	baseURL       string
 	model         string
@@ -186,9 +185,9 @@ func (c *Client) GenerateStream(ctx context.Context, prompt string) (<-chan core
 
 func (c *Client) ResetContext() {}
 
-func (c *Client) Clone() core.LlmClient {
+func (c *Client) Clone() core.ProviderClient {
 	clone := *c
 	return &clone
 }
 
-var _ core.LlmClient = (*Client)(nil)
+var _ core.ProviderClient = (*Client)(nil)

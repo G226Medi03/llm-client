@@ -34,9 +34,8 @@ type Config struct {
 	Options core.Options
 }
 
-// Client is an Ollama chat client. It implements core.LlmClient.
+// Client is an Ollama chat client. It implements core.ProviderClient.
 type Client struct {
-	core.Sealed
 	http            *http.Client
 	baseURL         string
 	model           string
@@ -99,7 +98,7 @@ func (c *Client) Generate(ctx context.Context, prompt string) (string, error) {
 func (c *Client) ResetContext() {}
 
 // Clone returns an equivalent client.
-func (c *Client) Clone() core.LlmClient {
+func (c *Client) Clone() core.ProviderClient {
 	return &Client{
 		http:            c.http,
 		baseURL:         c.baseURL,
@@ -134,4 +133,4 @@ func (c *Client) newRequest(prompt string, stream bool) chatRequest {
 	return req
 }
 
-var _ core.LlmClient = (*Client)(nil)
+var _ core.ProviderClient = (*Client)(nil)
