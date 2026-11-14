@@ -21,12 +21,14 @@ go get github.com/G226Medi03/llm-client
 ## Interfaces
 
 ```go
-type Client interface {
+type LlmResponse string
+
+type LlmClient interface {
     Model() string
-    Generate(ctx context.Context, prompt string) (string, error)
+    Generate(ctx context.Context, prompt string) (LlmResponse, error)
     GenerateStream(ctx context.Context, prompt string) (<-chan StreamResult, error)
     ResetContext()
-    Clone() Client
+    Clone() LlmClient
 }
 
 type OcrClient interface {
@@ -34,9 +36,9 @@ type OcrClient interface {
     GenerateWithImage(ctx context.Context, prompt string, imagePath string) (string, error)
 }
 
-// ImageClient combines Client and OcrClient.
+// ImageClient combines LlmClient and OcrClient.
 type ImageClient interface {
-    Client
+    LlmClient
     OcrClient
 }
 ```
@@ -57,7 +59,8 @@ if err != nil {
     log.Fatal(err)
 }
 
-text, err := client.Generate(ctx, "안녕하세요")
+response, err := client.Generate(ctx, "안녕하세요")
+fmt.Println(string(response))
 ```
 
 ### DeepSeek
@@ -73,7 +76,8 @@ if err != nil {
     log.Fatal(err)
 }
 
-text, err := client.Generate(ctx, "안녕하세요")
+response, err := client.Generate(ctx, "안녕하세요")
+fmt.Println(string(response))
 ```
 
 ### Ollama

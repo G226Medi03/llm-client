@@ -19,7 +19,7 @@ func TestNewFuncClient(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Generate: %v", err)
 	}
-	if output != "output:hello" {
+	if string(output) != "output:hello" {
 		t.Fatalf("output = %q", output)
 	}
 	clone := client.Clone()

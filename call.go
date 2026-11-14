@@ -9,7 +9,7 @@ import (
 // GenerateIsolated runs one LLM request with an isolated client context and
 // deadline. The base LlmClient is never mutated, so parallel callers cannot share
 // conversation state.
-func GenerateIsolated(ctx context.Context, base LlmClient, prompt string, timeout time.Duration) (string, error) {
+func GenerateIsolated(ctx context.Context, base LlmClient, prompt string, timeout time.Duration) (LlmResponse, error) {
 	if base == nil {
 		return "", fmt.Errorf("LLM client 가 없습니다")
 	}

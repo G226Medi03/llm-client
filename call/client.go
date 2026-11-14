@@ -36,7 +36,11 @@ func FromLLMClient(client llmclient.LlmClient) *Client {
 	result := &Client{
 		model: client.Model(),
 		generate: func(ctx context.Context, prompt string) (string, error) {
-			return llmclient.GenerateIsolated(ctx, client, prompt, LLM_REQUEST_TIMEOUT())
+			response, err := llmclient.GenerateIsolated(ctx, client, prompt, LLM_REQUEST_TIMEOUT())
+			if err != nil {
+				return "", err
+			}
+			return string(response), nil
 		},
 		reset: client.ResetContext,
 	}
@@ -53,11 +57,15 @@ func (c *Client) Model() string {
 	return c.model
 }
 
-func (c *Client) Generate(ctx context.Context, prompt string) (string, error) {
+func (c *Client) Generate(ctx context.Context, prompt string) (llmclient.LlmResponse, error) {
 	if c == nil || c.generate == nil {
 		return "", context.Canceled
 	}
-	return generateWithPolicy(ctx, c.generate, prompt)
+	output, err := generateWithPolicy(ctx, c.generate, prompt)
+	if err != nil {
+		return "", err
+	}
+	return llmclient.LlmResponse(output), nil
 }
 
 func (c *Client) Clone() *Client {
