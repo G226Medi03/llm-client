@@ -15,7 +15,7 @@ import (
 // implementations.
 type LlmClient interface {
 	Model() string
-	Generate(ctx context.Context, prompt string) (string, error)
+	Generate(ctx context.Context, prompt string) (LlmResponse, error)
 	GenerateStream(ctx context.Context, prompt string) (<-chan StreamResult, error)
 	ResetContext()
 	Clone() LlmClient
@@ -48,8 +48,12 @@ func (c *clientWrapper) Model() string {
 	return c.inner.Model()
 }
 
-func (c *clientWrapper) Generate(ctx context.Context, prompt string) (string, error) {
-	return c.inner.Generate(ctx, prompt)
+func (c *clientWrapper) Generate(ctx context.Context, prompt string) (LlmResponse, error) {
+	output, err := c.inner.Generate(ctx, prompt)
+	if err != nil {
+		return "", err
+	}
+	return LlmResponse(output), nil
 }
 
 func (c *clientWrapper) GenerateStream(ctx context.Context, prompt string) (<-chan StreamResult, error) {

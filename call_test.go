@@ -13,8 +13,8 @@ type fakeClient struct {
 func (*fakeClient) is_LlmClient() {}
 
 func (f *fakeClient) Model() string { return "fake" }
-func (f *fakeClient) Generate(context.Context, string) (string, error) {
-	return f.output, nil
+func (f *fakeClient) Generate(context.Context, string) (LlmResponse, error) {
+	return LlmResponse(f.output), nil
 }
 func (f *fakeClient) GenerateStream(context.Context, string) (<-chan StreamResult, error) {
 	ch := make(chan StreamResult)
@@ -32,7 +32,7 @@ func TestGenerateIsolated(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GenerateIsolated: %s", err)
 	}
-	if value != "ok" {
+	if value != LlmResponse("ok") {
 		t.Fatalf("value = %q", value)
 	}
 }
