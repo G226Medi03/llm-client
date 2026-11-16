@@ -9,8 +9,8 @@ import (
 type GenerateFunc func(ctx context.Context, prompt string) (string, error)
 
 // Client is the application-level text generation unit. It is not a provider
-// port: it owns replay, retry, timeout, and test behavior while delegating
-// actual network calls through FromLLMClient.
+// port: it owns retry, timeout, and test behavior while delegating actual
+// network calls through FromLLMClient.
 type Client struct {
 	model    string
 	generate GenerateFunc
