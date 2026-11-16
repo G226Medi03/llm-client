@@ -156,6 +156,26 @@ client, err := llmclient.NewDeepSeek(llmclient.DeepSeekConfig{
 })
 ```
 
+## Replay
+
+`call.NewReplay` builds a `*call.Client` backed by stored calls. Prompt matches
+take priority; stage matches are used as a fallback. Stages marked in
+`LiveStages` call the live client directly, without nested concurrency slots.
+
+```go
+replay := call.NewReplay(call.ReplayOptions{
+    Calls: []call.ReplayCall{
+        {Stage: "status_extract", Prompt: "prompt", Output: "stored output"},
+    },
+    Live:       liveClient,
+    LiveStages: map[string]bool{"relation_extract": true},
+    StageOf:    func(prompt string) string { return "status_extract" },
+})
+```
+
+`Live` may be nil for replay-only runs. `StageOf` may be nil when only exact
+prompt matching is needed.
+
 ## Migration from v0.1.6
 
 The provider packages are now internal. Replace imports such as:
