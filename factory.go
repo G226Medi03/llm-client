@@ -167,6 +167,7 @@ type OpenRouterConfig struct {
 	APIKey      string
 	BaseURL     string
 	Model       string
+	MaxTokens   int
 	HTTPReferer string
 	Title       string
 	Provider    *OpenRouterProviderPreferences
@@ -371,6 +372,7 @@ func NewOpenRouter(cfg OpenRouterConfig) (LlmClient, error) {
 		APIKey:      cfg.APIKey,
 		BaseURL:     cfg.BaseURL,
 		Model:       cfg.Model,
+		MaxTokens:   cfg.MaxTokens,
 		HTTPReferer: cfg.HTTPReferer,
 		Title:       cfg.Title,
 		Provider:    cfg.Provider,

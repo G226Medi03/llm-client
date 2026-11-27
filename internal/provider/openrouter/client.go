@@ -31,6 +31,7 @@ type Config struct {
 	APIKey      string
 	BaseURL     string
 	Model       string
+	MaxTokens   int
 	HTTPReferer string
 	Title       string
 	Provider    *ProviderPreferences
@@ -42,6 +43,7 @@ type Client struct {
 	baseURL     string
 	apiKey      string
 	model       string
+	maxTokens   int
 	httpReferer string
 	title       string
 	provider    *ProviderPreferences
@@ -91,11 +93,16 @@ func New(cfg Config) (*Client, error) {
 	if httpClient == nil {
 		httpClient = &http.Client{Timeout: 10 * time.Minute}
 	}
+	maxTokens := cfg.MaxTokens
+	if maxTokens <= 0 {
+		maxTokens = 128
+	}
 	return &Client{
 		http:        httpClient,
 		baseURL:     baseURL,
 		apiKey:      key,
 		model:       model,
+		maxTokens:   maxTokens,
 		httpReferer: strings.TrimSpace(cfg.HTTPReferer),
 		title:       strings.TrimSpace(cfg.Title),
 		provider:    cfg.Provider,
@@ -112,7 +119,7 @@ func (c *Client) Generate(ctx context.Context, prompt string) (string, error) {
 			Content: prompt,
 		}},
 		Temperature: 0,
-		MaxTokens:   128,
+		MaxTokens:   c.maxTokens,
 		Stream:      false,
 		Provider:    c.provider,
 	})
