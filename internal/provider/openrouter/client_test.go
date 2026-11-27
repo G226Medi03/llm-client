@@ -29,6 +29,9 @@ func TestGenerate(t *testing.T) {
 		if request["model"] != "google/gemma-4-26b-a4b-it:free" {
 			t.Fatalf("model = %v", request["model"])
 		}
+		if request["max_tokens"] != float64(128) {
+			t.Fatalf("max_tokens = %v", request["max_tokens"])
+		}
 		if _, ok := request["provider"]; ok {
 			t.Fatalf("provider should be omitted when unset: %v", request["provider"])
 		}
@@ -53,6 +56,36 @@ func TestGenerate(t *testing.T) {
 	}
 	if output != "③" {
 		t.Fatalf("output = %q", output)
+	}
+}
+
+func TestGenerateSendsConfiguredMaxTokens(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var request struct {
+			MaxTokens int `json:"max_tokens"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+			t.Fatalf("decode request: %v", err)
+		}
+		if request.MaxTokens != 4096 {
+			t.Fatalf("max_tokens = %d, want 4096", request.MaxTokens)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"choices":[{"message":{"content":"③"}}]}`))
+	}))
+	defer server.Close()
+
+	client, err := New(Config{
+		APIKey:    "test-key",
+		BaseURL:   server.URL,
+		Model:     "google/gemma-4-26b-a4b-it",
+		MaxTokens: 4096,
+	})
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+	if _, err := client.Generate(context.Background(), "question"); err != nil {
+		t.Fatalf("Generate: %v", err)
 	}
 }
 
